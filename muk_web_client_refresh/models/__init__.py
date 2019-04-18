@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ###################################################################################
 #
 #    Copyright (C) 2017 MuK IT GmbH
@@ -19,4 +17,7 @@
 #
 ###################################################################################
 
-from . import refresh_rule
+from . import base
+from . import ir_actions
+from . import base_automation
+from . import res_config_settings

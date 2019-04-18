@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ###################################################################################
 # 
 #    Copyright (C) 2017 MuK IT GmbH
@@ -22,15 +20,11 @@
 {
     "name": "MuK Web Notification",
     "summary": """Web Client Notification""",
-    "description": """ 
-        Adds a notification channel to the web client.
-        By sending a message to this channel, a global
-        notification is send.
-    """,
-    "version": "10.0.1.0.0",
+    "version": "12.0.1.0.1",
     "category": "Extra Tools",
     "license": "AGPL-3",
     "website": "http://www.mukit.at",
+    'live_test_url': 'https://mukit.at/r/SgN',
     "author": "MuK IT",
     "contributors": [
         "Mathias Markl <mathias.markl@mukit.at>",
@@ -40,8 +34,8 @@
     ],
     "data": [
         "template/assets.xml",
-    ],
-    "demo": [
+        "views/send_notifications.xml",
+        "views/res_config_settings_view.xml",
     ],
     "qweb": [
         "static/src/xml/*.xml",

@@ -1,22 +1,71 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![Build Status](https://travis-ci.org/muk-it/muk_web.svg?branch=10.0)](https://travis-ci.org/muk-it/muk_web)
-[![codecov](https://codecov.io/gh/muk-it/muk_web/branch/10.0/graph/badge.svg)](https://codecov.io/gh/muk-it/muk_web)
+[![Build Status](https://travis-ci.org/muk-it/muk_web.svg?branch=12.0)](https://travis-ci.org/muk-it/muk_web)
+[![codecov](https://codecov.io/gh/muk-it/muk_web/branch/12.0/graph/badge.svg)](https://codecov.io/gh/muk-it/muk_web)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/eff47569926c435d98a3187623615bc4)](https://www.codacy.com/app/keshrath/muk_web?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=muk-it/muk_web&amp;utm_campaign=Badge_Grade)
+[![Weblate](https://weblate.mukit.at/widgets/web-12/-/svg-badge.svg)](https://weblate.mukit.at/projects/web-12/)
+[![Demo](https://img.shields.io/badge/demo-Try%20me-243742.svg)](https://mukit.at/r/SgN)
 
 # MuK Odoo Web Modules
 
-addon | version | summary
---- | --- | ---
-[muk_web_export_attachment](muk_web_export_attachment/) | 10.0 | Export Odoo Attachments to PDF
-[muk_web_glyphicons](muk_web_glyphicons/) | 10.0 | Bootstrap Glyphicons Support
-[muk_web_preview](muk_web_preview/) | 10.0 | File Preview Dialog
-[muk_web_preview_attachment](muk_web_preview_attachment/) | 10.0 | Attachment Preview Dialog
-[muk_web_preview_audio](muk_web_preview_audio/) | 10.0 | Audio Preview
-[muk_web_preview_csv](muk_web_preview_csv/) | 10.0 | CSV Preview
-[muk_web_preview_image](muk_web_preview_image/) | 10.0 | Image Preview
-[muk_web_preview_mail](muk_web_preview_mail/) | 10.0 | Mail Preview
-[muk_web_preview_markdown](muk_web_preview_markdown/) | 10.0 | Markdown Preview
-[muk_web_preview_msoffice](muk_web_preview_msoffice/) | 10.0 | MS Office Preview
-[muk_web_preview_text](muk_web_preview_text/) | 10.0 | Text Preview
-[muk_web_preview_vector](muk_web_preview_vector/) | 10.0 | Vector Preview
-[muk_web_preview_video](muk_web_preview_video/) | 10.0 | Video Preview
+This set of modules offers improvments and extensions to the Odoo web client.
+
+### Installation
+
+To install this module, you need to:
+
+Download the module and add it to your Odoo addons folder. Afterward,
+log on to your Odoo server and go to the Apps menu. Trigger the debug
+mode and update the list by clicking on the "Update Apps List" link. Now
+install the module by clicking on the install button.
+
+Another way to install this module is via the package management for
+Python ([PyPI]).
+
+To install our modules using the package manager make sure
+[odoo-autodiscover] is installed correctly. Then open a console and
+install the module by entering the following command:
+
+`pip install --extra-index-url https://nexus.mukit.at/repository/odoo/simple <module>`
+
+The module name consists of the Odoo version and the module name, where
+underscores are replaced by a dash.
+
+**Module:**
+
+`odoo<version>-addon-<module_name>`
+
+**Example:**
+
+`sudo -H pip3 install --extra-index-url https://nexus.mukit.at/repository/odoo/simple odoo11-addon-muk-utils`
+
+Once the installation has been successfully completed, the app is
+already in the correct folder. Log on to your Odoo server and go to the
+Apps menu. Trigger the debug mode and update the list by clicking on the
+"Update Apps List" link. Now install the module by clicking on the
+install button.
+
+You can also view available Apps directly in our [repository] and find a
+more detailed installation guide on our [website].
+
+### Upgrade
+
+To upgrade this module, you need to:
+
+Download the module and add it to your Odoo addons folder. Restart the
+server and log on to your Odoo server. Select the Apps menu and upgrade
+the module by clicking on the upgrade button.
+
+If you installed the module using the "pip" command, you can also update
+the module in the same way. Just type the following command into the
+console:
+
+`pip install --upgrade --extra-index-url https://nexus.mukit.at/repository/odoo/simple <module>`
+
+When the process is finished, restart your server and update the
+application in Odoo, just like you would normally.
+
+  [PyPI]: https://pypi.org/project/pip/
+  [odoo-autodiscover]: https://pypi.org/project/odoo-autodiscover/
+  [repository]: https://nexus.mukit.at/#browse/browse:odoo
+  [website]: https://mukit.at/page/open-source
+  [MuK IT]: https://www.mukit.at/

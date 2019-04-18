@@ -20,45 +20,29 @@
 odoo.define('muk_web_client_notification.channel', function (require) {
 "use strict";
 
-var core = require('web.core');
-var session = require('web.session');	
-var bus = require('bus.bus')	
-
 var WebClient = require('web.WebClient');
-
-var _t = core._t;
-var QWeb = core.qweb;
-
+var NotificationService = require('web.NotificationService');
 
 WebClient.include({
 	show_application: function() {
-		var channel = session.db + '_notification';
-        this.bus_declare_channel(channel, this.show_notification);
-        return this._super();
+        this.bus_declare_channel('notify', this.notify.bind(this));
+        return this._super.apply(this, arguments);
     },
-    show_notification: function(message) {
-    	try {
-            var notification = JSON.parse(message);
-            if(!notification.uid || notification.uid === session.uid) {
-            	if(notification.type === "warning") {
-            		this.notification_manager.notify(
-           				 notification.title,
-           				 notification.message,
-           				 notification.sticky);
-            	} else {
-            		 this.notification_manager.notify(
-        				 notification.title,
-        				 notification.message,
-        				 notification.sticky);
-            	}
-            }
-        } catch (e) {
-        	this.notification_manager.notify(
-                _t('Information'),
-                message,
-                false
-            );
-        }
+    notify: function(message) {
+    	this.call('notification', 'notify', _.extend(message, {
+    		buttons: _.map(message.buttons, function(button) {
+    			button.click = this._notification_click.bind(this, {
+    				'action': button.action, 
+    				'options': button.options,
+    				'button': button,
+    				'message': message
+    			});
+    			return button;
+    		}, this),
+    	}));
+    },
+    _notification_click: function(params) {
+    	this.action_manager.doAction(params.action, params.options)
     }
 });
     

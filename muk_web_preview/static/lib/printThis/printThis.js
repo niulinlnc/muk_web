@@ -1,40 +1,45 @@
 /*
- * printThis v1.10.0
+ * printThis v1.14.1
  * @desc Printing plug-in for jQuery
  * @author Jason Day
  *
- * Resources (based on) :
- *              jPrintArea: http://plugins.jquery.com/project/jPrintArea
- *              jqPrint: https://github.com/permanenttourist/jquery.jqprint
- *              Ben Nadal: http://www.bennadel.com/blog/1591-Ask-Ben-Print-Part-Of-A-Web-Page-With-jQuery.htm
+ * Resources (based on):
+ * - jPrintArea: http://plugins.jquery.com/project/jPrintArea
+ * - jqPrint: https://github.com/permanenttourist/jquery.jqprint
+ * - Ben Nadal: http://www.bennadel.com/blog/1591-Ask-Ben-Print-Part-Of-A-Web-Page-With-jQuery.htm
  *
  * Licensed under the MIT licence:
  *              http://www.opensource.org/licenses/mit-license.php
  *
- * (c) Jason Day 2015
+ * (c) Jason Day 2015-2018
  *
  * Usage:
  *
  *  $("#mySelector").printThis({
- *      debug: false,               // show the iframe for debugging
- *      importCSS: true,            // import page CSS
- *      importStyle: false,         // import style tags
- *      printContainer: true,       // grab outer container as well as the contents of the selector
- *      loadCSS: "path/to/my.css",  // path to additional css file - us an array [] for multiple
- *      pageTitle: "",              // add title to print page
- *      removeInline: false,        // remove all inline styles from print elements
- *      printDelay: 333,            // variable print delay
- *      header: null,               // prefix to html
- *      footer: null,               // postfix to html
- *      base: false,                // preserve the BASE tag, or accept a string for the URL
- *      formValues: true,           // preserve input/form values
- *      canvas: false,              // copy canvas elements (experimental)
- *      doctypeString: '...',       // enter a different doctype for older markup
- *      removeScripts: false        // remove script tags from print content
+ *      debug: false,                   // show the iframe for debugging
+ *      importCSS: true,                // import parent page css
+ *      importStyle: false,             // import style tags
+ *      printContainer: true,           // grab outer container as well as the contents of the selector
+ *      loadCSS: "path/to/my.css",      // path to additional css file - use an array [] for multiple
+ *      pageTitle: "",                  // add title to print page
+ *      removeInline: false,            // remove all inline styles from print elements
+ *      removeInlineSelector: "body *", // custom selectors to filter inline styles. removeInline must be true
+ *      printDelay: 333,                // variable print delay
+ *      header: null,                   // prefix to html
+ *      footer: null,                   // postfix to html
+ *      base: false,                    // preserve the BASE tag, or accept a string for the URL
+ *      formValues: true,               // preserve input/form values
+ *      canvas: false,                  // copy canvas elements
+ *      doctypeString: '...',           // enter a different doctype for older markup
+ *      removeScripts: false,           // remove script tags from print content
+ *      copyTagClasses: false           // copy classes from the html & body tag
+ *      beforePrintEvent: null,         // callback function for printEvent in iframe
+ *      beforePrint: null,              // function called before iframe is filled
+ *      afterPrint: null                // function called before iframe is removed
  *  });
  *
  * Notes:
- *  - the loadCSS will load additional css (with or without @media print) into the iframe, adjusting layout
+ *  - the loadCSS will load additional CSS (with or without @media print) into the iframe, adjusting layout
  */
 ;
 (function($) {
@@ -48,7 +53,14 @@
 
     function appendBody($body, $element, opt) {
         // Clone for safety and convenience
-        var $content = $element.clone();
+        // Calls clone(withDataAndEvents = true) to copy form values.
+        var $content = $element.clone(opt.formValues);
+
+        if (opt.formValues) {
+            // Copy original select and textarea values to their cloned counterpart
+            // Makes up for inability to clone select and textarea values with clone(true)
+            copyValues($element, $content, 'select, textarea');
+        }
 
         if (opt.removeScripts) {
             $content.find('script').remove();
@@ -56,13 +68,22 @@
 
         if (opt.printContainer) {
             // grab $.selector as container
-            $body.append($("<div/>").html($content).html());
+            $content.appendTo($body);
         } else {
             // otherwise just print interior elements of container
             $content.each(function() {
-                $body.append($(this).html());
+                $(this).children().appendTo($body)
             });
         }
+    }
+
+    // Copies values from origin to clone for passed in elementSelector
+    function copyValues(origin, clone, elementSelector) {
+        var $originalElements = origin.find(elementSelector);
+
+        clone.find(elementSelector).each(function(index, item) {
+            $(item).val($originalElements.eq(index).val());
+        });
     }
 
     var opt;
@@ -98,9 +119,14 @@
             height: "0px",
             left: "-600px",
             top: "-600px"
-        }); 
+        });
 
-        // $iframe.ready() and $iframe.load were inconsistent between browsers    
+        // before print callback
+        if (typeof opt.beforePrint === "function") {
+            opt.beforePrint();
+        }
+
+        // $iframe.ready() and $iframe.load were inconsistent between browsers
         setTimeout(function() {
 
             // Add doctype to fix the style difference between printing and render
@@ -146,10 +172,10 @@
                     $head.append("<link type='text/css' rel='stylesheet' href='" + href + "' media='" + media + "'>");
                 }
             });
-            
+
             // import style tags
             if (opt.importStyle) $("style").each(function() {
-                $(this).clone().appendTo($head);
+                $head.append(this.outerHTML);
             });
 
             // add title of the page
@@ -157,12 +183,29 @@
 
             // import additional stylesheet(s)
             if (opt.loadCSS) {
-               if ($.isArray(opt.loadCSS)) {
+                if ($.isArray(opt.loadCSS)) {
                     jQuery.each(opt.loadCSS, function(index, value) {
-                       $head.append("<link type='text/css' rel='stylesheet' href='" + this + "'>");
+                        $head.append("<link type='text/css' rel='stylesheet' href='" + this + "'>");
                     });
                 } else {
                     $head.append("<link type='text/css' rel='stylesheet' href='" + opt.loadCSS + "'>");
+                }
+            }
+
+            var pageHtml = $('html')[0];
+
+            // CSS VAR in html tag when dynamic apply e.g.  document.documentElement.style.setProperty("--foo", bar);
+            $doc.find('html').prop('style', pageHtml.style.cssText);
+
+            // copy 'root' tag classes
+            var tag = opt.copyTagClasses;
+            if (tag) {
+                tag = tag === true ? 'bh' : tag;
+                if (tag.indexOf('b') !== -1) {
+                    $body.addClass($('body')[0].className);
+                }
+                if (tag.indexOf('h') !== -1) {
+                    $doc.find('html').addClass(pageHtml.className);
                 }
             }
 
@@ -172,7 +215,8 @@
             if (opt.canvas) {
                 // add canvas data-ids for easy access after cloning.
                 var canvasId = 0;
-                $element.find('canvas').each(function(){
+                // .addBack('canvas') adds the top-level element if it is a canvas.
+                $element.find('canvas').addBack('canvas').each(function(){
                     $(this).attr('data-printthis', canvasId++);
                 });
             }
@@ -188,71 +232,47 @@
                     this.getContext('2d').drawImage($src[0], 0, 0);
 
                     // Remove the markup from the original
-                    $src.removeData('printthis');
+                    if ($.isFunction($.fn.removeAttr)) {
+                        $src.removeAttr('data-printthis');
+                    } else {
+                        $.each($src, function(i, el) {
+                            el.removeAttribute('data-printthis')
+                        });
+                    }
                 });
             }
 
-            // capture form/field values
-            if (opt.formValues) {
-                // loop through inputs
-                var $input = $element.find('input');
-                if ($input.length) {
-                    $input.each(function() {
-                        var $this = $(this),
-                            $name = $(this).attr('name'),
-                            $checker = $this.is(':checkbox') || $this.is(':radio'),
-                            $iframeInput = $doc.find('input[name="' + $name + '"]'),
-                            $value = $this.val();
-
-                        // order matters here
-                        if (!$checker) {
-                            $iframeInput.val($value);
-                        } else if ($this.is(':checked')) {
-                            if ($this.is(':checkbox')) {
-                                $iframeInput.attr('checked', 'checked');
-                            } else if ($this.is(':radio')) {
-                                $doc.find('input[name="' + $name + '"][value="' + $value + '"]').attr('checked', 'checked');
-                            }
-                        }
-
-                    });
-                }
-
-                // loop through selects
-                var $select = $element.find('select');
-                if ($select.length) {
-                    $select.each(function() {
-                        var $this = $(this),
-                            $name = $(this).attr('name'),
-                            $value = $this.val();
-                        $doc.find('select[name="' + $name + '"]').val($value);
-                    });
-                }
-
-                // loop through textareas
-                var $textarea = $element.find('textarea');
-                if ($textarea.length) {
-                    $textarea.each(function() {
-                        var $this = $(this),
-                            $name = $(this).attr('name'),
-                            $value = $this.val();
-                        $doc.find('textarea[name="' + $name + '"]').val($value);
-                    });
-                }
-            } // end capture form/field values
-
             // remove inline styles
             if (opt.removeInline) {
+                // Ensure there is a selector, even if it's been mistakenly removed
+                var selector = opt.removeInlineSelector || '*';
                 // $.removeAttr available jQuery 1.7+
                 if ($.isFunction($.removeAttr)) {
-                    $doc.find("body *").removeAttr("style");
+                    $body.find(selector).removeAttr("style");
                 } else {
-                    $doc.find("body *").attr("style", "");
+                    $body.find(selector).attr("style", "");
                 }
             }
 
             // print "footer"
             appendContent($body, opt.footer);
+
+            // attach event handler function to beforePrint event
+            function attachOnBeforePrintEvent($iframe, beforePrintHandler) {
+                var win = $iframe.get(0);
+                win = win.contentWindow || win.contentDocument || win;
+
+                if (typeof beforePrintHandler === "function") {
+                    if ('matchMedia' in win) {
+                        win.matchMedia('print').addListener(function(mql) {
+                            if(mql.matches)  beforePrintHandler();
+                        });
+                    } else {
+                        win.onbeforeprint = beforePrintHandler;
+                    }
+                }
+            }
+            attachOnBeforePrintEvent($iframe, opt.beforePrint);
 
             setTimeout(function() {
                 if ($iframe.hasClass("MSIE")) {
@@ -274,10 +294,16 @@
                 if (!opt.debug) {
                     setTimeout(function() {
                         $iframe.remove();
+
                     }, 1000);
                 }
 
-            }, opt.printDelay); 
+                // after print callback
+                if (typeof opt.afterPrint === "function") {
+                    opt.afterPrint();
+                }
+
+            }, opt.printDelay);
 
         }, 333);
 
@@ -285,20 +311,25 @@
 
     // defaults
     $.fn.printThis.defaults = {
-        debug: false,           // show the iframe for debugging
-        importCSS: true,        // import parent page css
-        importStyle: false,     // import style tags
-        printContainer: true,   // print outer container/$.selector
-        loadCSS: "",            // load an additional css file - load multiple stylesheets with an array []
-        pageTitle: "",          // add title to print page
-        removeInline: false,    // remove all inline styles
-        printDelay: 333,        // variable print delay
-        header: null,           // prefix to html
-        footer: null,           // postfix to html
-        formValues: true,       // preserve input/form values
-        canvas: false,          // copy canvas content (experimental)
-        base: false,            // preserve the BASE tag, or accept a string for the URL
-        doctypeString: '<!DOCTYPE html>', // html doctype
-        removeScripts: false    // remove script tags before appending
+        debug: false,               // show the iframe for debugging
+        importCSS: true,            // import parent page css
+        importStyle: false,         // import style tags
+        printContainer: true,       // print outer container/$.selector
+        loadCSS: "",                // path to additional css file - use an array [] for multiple
+        pageTitle: "",              // add title to print page
+        removeInline: false,        // remove inline styles from print elements
+        removeInlineSelector: "*",  // custom selectors to filter inline styles. removeInline must be true
+        printDelay: 333,            // variable print delay
+        header: null,               // prefix to html
+        footer: null,               // postfix to html
+        base: false,                // preserve the BASE tag or accept a string for the URL
+        formValues: true,           // preserve input/form values
+        canvas: false,              // copy canvas content
+        doctypeString: '<!DOCTYPE html>', // enter a different doctype for older markup
+        removeScripts: false,       // remove script tags from print content
+        copyTagClasses: false,      // copy classes from the html & body tag
+        beforePrintEvent: null,     // callback function for printEvent in iframe
+        beforePrint: null,          // function called before iframe is filled
+        afterPrint: null            // function called before iframe is removed
     };
 })(jQuery);

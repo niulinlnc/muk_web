@@ -20,28 +20,45 @@
 odoo.define('muk_web_client_refresh.channel', function (require) {
 "use strict";
 
+var config = require('web.config');	
+var session = require('web.session');		
+
 var WebClient = require('web.WebClient');
-var session = require('web.session');	
-var bus = require('bus.bus')	
+var BusService = require('bus.BusService');
 
 WebClient.include({
+	start: function () {
+		var self = this;
+		var load_config = this._rpc({
+            route: '/config/muk_web_client_refresh.refresh_delay',
+        }).done(function(result) {
+        	self.refresh_delay = result.refresh_delay;
+            self._reload = _.throttle(self._reload, self.refresh_delay || 1000);
+        });
+		return $.when(this._super.apply(this, arguments), load_config);
+	},
 	show_application: function() {
-		var channel = session.db + '_refresh';
-        this.bus_declare_channel(channel, this.refresh);
-        return this._super();
+        this.bus_declare_channel('refresh', this.refresh.bind(this));
+        return this._super.apply(this, arguments);
     },
     refresh: function(message) {
-    	var active_view = this.action_manager.inner_widget.active_view
-        if (active_view){   
-            var controller = this.action_manager.inner_widget.active_view.controller
-            if (controller.model === message  && !controller.$el.hasClass('o_form_editable')){                                               
-                if (active_view.type === "kanban")
-                    controller.do_reload();
-                if (active_view.type === "list" || active_view.type === "form")
-                    controller.reload();                                        
-            }
+    	var action = this.action_manager.getCurrentAction();
+    	var controller = this.action_manager.getCurrentController();
+    	if (!this.call('bus_service', 'isMasterTab') || session.uid !== message.uid && 
+    			action && controller && controller.widget.modelName === message.model && 
+    			controller.widget.mode === "readonly") {
+    		if(controller.widget.isMultiRecord && (message.create || _.intersection(message.ids, action.env.ids) >= 1)) {
+    			this._reload(message, controller);
+        	} else if(!controller.widget.isMultiRecord && message.ids.includes(action.env.currentId)) {
+        		this._reload(message, controller);
+        	}
         }
-    }
+    },
+    _reload: function(message, controller) {
+		if(controller && controller.widget) {
+    		controller.widget.reload();
+		}
+    },
 });
-    
+
 });

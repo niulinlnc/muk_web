@@ -36,7 +36,7 @@ function Visualizer($audio, $container, $canvas) {
 	this.smoothEndingCounter = 0;
 	
 	this.audioSrc.connect(this.analyser);
-	this.analyser.connect(this.audioCtx.destination);
+	this.analyser.connect(this.audioCtx.destination); 
     
 	this.ctx = this.canvas.getContext('2d'),
     
@@ -53,8 +53,8 @@ function Visualizer($audio, $container, $canvas) {
 	}
     
 	this.calcCanvas = function() {
-		_this.canvas.width = _this.$container.width() !== 0 ? _this.$container.width() : 650;
-		_this.canvas.height = _this.$container.height() !== 0 ? _this.$container.height() : 360;
+		_this.canvas.width = _this.$container.width() !== 0 ? _this.$container.width() : 200;
+		_this.canvas.height = _this.$container.height() !== 0 ? _this.$container.height() : 100;
 		_this.cwidth = _this.canvas.width;
 		_this.cheight = _this.canvas.height - 4;
 		_this.meterWidth = 10;

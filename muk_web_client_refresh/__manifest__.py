@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ###################################################################################
 # 
 #    Copyright (C) 2017 MuK IT GmbH
@@ -22,29 +20,24 @@
 {
     "name": "MuK Web Refresh",
     "summary": """Web Client Refresh""",
-    "description": """ 
-        Adds a refresh channel to the web client.
-        By sending a message to this channel, the
-        corresponding view is reloaded.
-    """,
-    "version": "10.0.1.0.0",
+    "version": "12.0.2.2.2",
     "category": "Extra Tools",
     "license": "AGPL-3",
     "website": "http://www.mukit.at",
+    'live_test_url': 'https://mukit.at/r/SgN',
     "author": "MuK IT",
     "contributors": [
         "Mathias Markl <mathias.markl@mukit.at>",
     ],
     "depends": [
+        "base_automation",
         "muk_web_client",
     ],
     "data": [
         "template/assets.xml",
-        "security/ir.model.access.csv",
-        "views/refresh_menu.xml",
-        "views/refresh_rule_view.xml",
-    ],
-    "demo": [
+        "views/refresh_action_view.xml",
+        "views/res_config_settings_view.xml",
+        "data/refresh_actions.xml",
     ],
     "qweb": [
         "static/src/xml/*.xml",
@@ -58,5 +51,6 @@
     },
     "application": False,
     "installable": True,
-    
+    "post_init_hook": "_install_initialize_rules",
+    "uninstall_hook": "_uninstall_remove_rules",
 }
