@@ -34,10 +34,25 @@ class ResConfigSettings(models.TransientModel):
     # Database
     #----------------------------------------------------------
     
+    module_muk_web_theme_mail = fields.Boolean(
+        string="Theme Mail",
+        help="Optimizes the mail chatter for the theme.")
+    
+    module_muk_web_theme_branding = fields.Boolean(
+        string="Theme Branding",
+        help="Customize the theme according to your needs.")
+    
+    module_muk_web_theme_website = fields.Boolean(
+        string="Theme Website",
+        help="Add theme styled website navigation.")
+    
+    module_muk_web_theme_mobile = fields.Boolean(
+        string="Theme Mobile",
+        help="Allow Odoo to be used as a PWA app.")
+    
     theme_background_image = fields.Binary(
         related="company_id.background_image",
-        readonly=False,
-        required=True)
+        readonly=False)
     
     theme_background_blend_mode = fields.Selection(
         related="company_id.background_blend_mode",
@@ -56,6 +71,9 @@ class ResConfigSettings(models.TransientModel):
     
     theme_color_primary = fields.Char(
         string="Theme Primary Color")
+    
+    theme_color_required = fields.Char(
+        string="Theme Required Color")
     
     theme_color_menu = fields.Char(
         string="Theme Menu Color")
@@ -77,6 +95,7 @@ class ResConfigSettings(models.TransientModel):
         variables = [
             'o-brand-odoo',
             'o-brand-primary',
+            'mk-required-color',
             'mk-apps-color',
             'mk-appbar-color',
             'mk-appbar-background',
@@ -87,6 +106,7 @@ class ResConfigSettings(models.TransientModel):
         colors_changed = []
         colors_changed.append(self.theme_color_brand != colors['o-brand-odoo'])
         colors_changed.append(self.theme_color_primary != colors['o-brand-primary'])
+        colors_changed.append(self.theme_color_required != colors['mk-required-color'])
         colors_changed.append(self.theme_color_menu != colors['mk-apps-color'])
         colors_changed.append(self.theme_color_appbar_color != colors['mk-appbar-color'])
         colors_changed.append(self.theme_color_appbar_background != colors['mk-appbar-background'])
@@ -94,6 +114,7 @@ class ResConfigSettings(models.TransientModel):
             variables = [
                 {'name': 'o-brand-odoo', 'value': self.theme_color_brand or "#243742"},
                 {'name': 'o-brand-primary', 'value': self.theme_color_primary or "#5D8DA8"},
+                {'name': 'mk-required-color', 'value': self.theme_color_required or "#d1dfe6"},
                 {'name': 'mk-apps-color', 'value': self.theme_color_menu or "#f8f9fa"},
                 {'name': 'mk-appbar-color', 'value': self.theme_color_appbar_color or "#dee2e6"},
                 {'name': 'mk-appbar-background', 'value': self.theme_color_appbar_background or "#000000"},
@@ -111,6 +132,7 @@ class ResConfigSettings(models.TransientModel):
         variables = [
             'o-brand-odoo',
             'o-brand-primary',
+            'mk-required-color',
             'mk-apps-color',
             'mk-appbar-color',
             'mk-appbar-background',
@@ -121,6 +143,7 @@ class ResConfigSettings(models.TransientModel):
         res.update({
             'theme_color_brand': colors['o-brand-odoo'],
             'theme_color_primary': colors['o-brand-primary'],
+            'theme_color_required': colors['mk-required-color'],
             'theme_color_menu': colors['mk-apps-color'],
             'theme_color_appbar_color': colors['mk-appbar-color'],
             'theme_color_appbar_background': colors['mk-appbar-background'],

@@ -21,7 +21,7 @@
 // Fonts
 //----------------------------------------------------------
 
-$font-family-sans-serif: 'Roboto';
+$font-family-sans-serif: 'Roboto', 'Noto';
 
 //----------------------------------------------------------
 // Components
@@ -36,7 +36,6 @@ $border-radius-sm: 0;
 //----------------------------------------------------------
 
 $link-color: darken($o-brand-primary, 8%);
-$font-family-sans-serif: 'Roboto';
 
 //----------------------------------------------------------
 // AppBarMenu
@@ -52,3 +51,9 @@ $mk-sidebar-small-width: 46px;
 $mk-form-min-width: 835px;
 $mk-chatter-min-width: 550px;
 $mk-chatter-max-width: 600px;
+
+//----------------------------------------------------------
+// List View
+//----------------------------------------------------------
+
+$o-list-footer-bg-color: $o-brand-odoo;

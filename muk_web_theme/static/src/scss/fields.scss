@@ -25,6 +25,13 @@
 
 .o_required_modifier {
     &.o_input, .o_input {
-        background-color: lighten($o-brand-primary, 35%) ! important;
+        background-color: $mk-required-color !important;
     }
+}
+
+@include media-breakpoint-down(sm) {
+    .o_form_view .mk_mobile_add {
+		margin-left: 0 !important;
+        margin-bottom: 10px !important;
+	}
 }
